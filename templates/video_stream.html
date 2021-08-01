@@ -1,0 +1,155 @@
+
+<!doctype html>
+
+<!-- <script type="text/javascript">
+    // setInterval 啟動後每隔一定時間就會重複執行
+    var intervalID = setInterval(update_values, 1000);
+    // 宣告一個function更新數據
+    function update_values() {
+        // 一但有數據返回，將會調用特定函數
+        // $.ajax({
+        //     dataType: "json",
+        //     url: url,
+        //     data: data,
+        //     success: success
+        // });
+        $.getJSON($SCRIPT_ROOT + '/res',
+        
+        function(data) {
+            $('#result').text(data.result);
+            console.log(data)
+        });
+        
+    };
+        
+</script> -->
+
+<html>
+    <head>
+        <title>Intel RealSense L515 Web Sample</title>
+
+        <!-- 在網頁上透過AJAX來載入JQuery函式庫 -->
+        <!-- <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> -->
+        <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+        <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}"> -->
+
+        <!-- 將 JQuery定義在根目錄執行 (JQuery只能用動態路徑) -->
+        <script type="text/javascript">
+
+            var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+            var clicked = true;
+            // Open / Close Camera
+            $(function() { 
+                $("#bt_cam").click(function (event) { 
+                    $.getJSON(  $SCRIPT_ROOT + '/_camStats', {} , 
+                    function(data) {
+                        if(data.stats){
+                            $('#bt_cam').text('Close Camera');
+                        }else{
+                            $('#bt_cam').text('Open Camera');
+                        }
+                    }
+                    );
+                }); 
+            }); 
+            // Quit Web App
+            $(function() { 
+                $("#bt_quit").click(function (event) { 
+                    $.getJSON(  $SCRIPT_ROOT + '/_quit', {} , 
+                    function(data) {}
+                    );
+                }); 
+            }); 
+            // Set Color Mode
+            $(function() { 
+                $("#bt_color").click(function (event) { 
+                    $.getJSON(  $SCRIPT_ROOT + '/_colorMode', {} , function(data) {}
+                    );
+                }); 
+            }); 
+            // Set Depth Mode
+            $(function() { 
+                $("#bt_depth").click(function (event) { 
+                    $.getJSON(  $SCRIPT_ROOT + '/_depthMode', {} , function(data) { }
+                    ); 
+                }); 
+            }); 
+            // Set Clipping Mode
+            $(function() { 
+                $("#bt_clip").click(function (event) { 
+                    $.getJSON(  $SCRIPT_ROOT + '/_clipMode', {} , function(data) { }
+                    ); 
+                }); 
+            }); 
+            // Set Cursor Depth Mode
+            $(function() { 
+                $("#bt_cursorDepth").click(function (event) { 
+                    $.getJSON(  $SCRIPT_ROOT + '/_cursorDepthMode', {} , function(data) { }
+                    ); 
+                }); 
+            });
+            // get cursor position
+            $(function() { 
+                $("#bg").click(function (event) { 
+                    var dict = {'x':0, 'y':0};
+                    dict['x'] = event.pageX - $("#bg").offset().left;
+                    dict['y'] = event.pageY - $("#bg").offset().top;
+                    // alert("X Coordinate: " + dict['x'] + " Y Coordinate: " + dict['y']);
+
+                    $.ajax({
+                        type: 'POST',
+                        url: $SCRIPT_ROOT + '/_cursorPos',
+                        data: JSON.stringify(dict),
+                        contentType: "application/json",           
+                    });
+                });
+            });
+
+            $(function(){
+                $("#slider").change(function(event){
+                    var val = $('#slider').val()
+                    $("#clip_dis").text('Depth Limit ' + val + ' (cm)');
+                    $.ajax({
+                        type: 'POST',
+                        url: $SCRIPT_ROOT + '/_clipDistance',
+                        data: JSON.stringify(val),
+                        contentType: "application/json",           
+                    });
+                });
+            });
+
+        </script> 
+
+    </head>
+    <body>
+        <div>
+            <h1 style="text-align:center;width:640px;">L515 Web Sample</h1>
+        </div>
+        <div style="text-align:center;width:640px;height:50px;">
+            <button id="bt_cam" > Open Camera </button>
+            <button id="bt_color" > Color Mode </button>
+            <button id="bt_depth" > Depth Mode </button>
+            <button id="bt_clip" > Clipping BG </button>
+            <button id="bt_cursorDepth" > Get Distance </button>
+            <button id="bt_quit" > Quit </button>
+        </div>
+        <div>
+            <img id="bg" src="{{ url_for('feed_frame') }}" ismap>
+        </div>
+        <div style="text-align:center; width:640px;">
+            
+            <div style="display:inline-block; height: 80px;">
+                <form method="POST" action="test" style="text-align:center;">
+                    <input id="slider" type="range" min="60" max="300" value="100" name="name_of_slider" style="width: 480px;  background-color: #b9fde4;"/>
+                </form>
+            </div>
+            <div style="display:inline-block; margin-left: 10px;">
+                <p id="clip_dis" style="font-size: 14px;">Depth Limit: 100 (cm)</p>
+            </div>
+
+            
+        </div>
+
+    </body>
+</html>
+  
